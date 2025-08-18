@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .upload-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .file-input {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .file-input:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .upload-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-btn:hover {
+            background: #0056b3;
+        }
+        .upload-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .audio-preview {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>🎵 Audio File Upload</h1>
+        <p>Upload an audio file to get started</p>
+        
+        <form id="uploadForm">
+            <div class="file-input" onclick="document.getElementById('audioFile').click()">
+                <input type="file" id="audioFile" accept="audio/*" style="display: none;" required>
+                <div id="fileInfo">
+                    <p>📁 Click to select audio file</p>
+                    <p>Supports: MP3, WAV, M4A, etc.</p>
+                </div>
+            </div>
+            
+            <button type="submit" class="upload-btn" id="uploadBtn" disabled>
+                Upload Audio
+            </button>
+        </form>
+        
+        <div id="status"></div>
+        <div id="audioPreview" class="audio-preview"></div>
+    </div>
+
+    <script>
+        const audioFile = document.getElementById('audioFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const status = document.getElementById('status');
+        const audioPreview = document.getElementById('audioPreview');
+
+        audioFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileInfo.innerHTML = `
+                    <p>📁 Selected: ${file.name}</p>
+                    <p>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p>Type: ${file.type}</p>
+                `;
+                uploadBtn.disabled = false;
+                
+                // Show audio preview
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = URL.createObjectURL(file);
+                audioPreview.innerHTML = '';
+                audioPreview.appendChild(audio);
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('audio_file', audioFile.files[0]);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            try {
+                const response = await fetch('/upload-audio/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    status.innerHTML = `
+                        <div class="status success">
+                            <h3>✅ Upload Successful!</h3>
+                            <p><strong>Filename:</strong> ${result.filename}</p>
+                            <p><strong>Saved as:</strong> ${result.file_path}</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                status.innerHTML = `
+                    <div class="status error">
+                        <h3>❌ Upload Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Audio';
+            }
+        });
+    </script>
+</body>
+</html>
