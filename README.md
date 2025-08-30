@@ -6,3 +6,6 @@ Lecture 2: https://github.com/inference-ai-course/WilliamJiang-HW/tree/main/Lect
 
 Lecture 3: https://github.com/inference-ai-course/WilliamJiang-HW/tree/main/Lecture%203
 *Lecture 3 Homework "Voice Activation Development" opens servers but cannot handle files yet*
+
+Lecture 4: https://github.com/inference-ai-course/WilliamJiang-HW/tree/main/Lecture%204
+*All files work. They were all made in a virtual environment and for it to work, install requirements.txt in each folder.*
